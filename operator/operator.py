@@ -67,7 +67,6 @@ def create_ingress_object(namespace, service_name, service_uid, path, port):
 @kopf.on.update('v1', 'services')
 def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
     api = k8s_client.NetworkingV1Api()
-    core = k8s_client.CoreV1Api()
 
     ingress_name_prefix = f"auto-ingress-{name}"
 
