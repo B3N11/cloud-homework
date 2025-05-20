@@ -12,6 +12,9 @@ def build_ingress_name(service_name, port_name):
 
 
 def find_http_port(service):
+    print("Finding HTTP port in service spec")
+    print(service)
+    print("---------------------")
     ports = service.spec.ports
     for port in ports:
         if port.name == "http":
