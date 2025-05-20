@@ -12,9 +12,6 @@ def build_ingress_name(service_name, port_name):
 
 
 def find_http_port(service):
-    print("Finding HTTP port in service spec")
-    print(service.spec)
-    print("---------------------")
     ports = service.spec['ports']
     for port in ports:
         if port['name'] == "http":
@@ -53,7 +50,7 @@ def create_ingress_object(namespace, service_name, path, port):
                                     service=k8s_client.V1IngressServiceBackend(
                                         name=service_name,
                                         port=k8s_client.V1ServiceBackendPort(
-                                            number=port['target_port'] or port['port']
+                                            number=port['targetPort'] or port['port']
                                         ),
                                     )
                                 ),
