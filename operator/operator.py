@@ -19,7 +19,7 @@ def find_http_port(service):
     return ports[0] if ports else None
 
 
-def create_ingress_object(namespace, service_name, path, port):
+def create_ingress_object(namespace, service_name, service_uid, path, port):
     ingress_name = build_ingress_name(service_name, port['name'] or str(port['port']))
 
     return k8s_client.V1Ingress(
@@ -32,8 +32,9 @@ def create_ingress_object(namespace, service_name, path, port):
                     api_version="v1",
                     kind="Service",
                     name=service_name,
-                    uid="",
+                    uid=service_uid,
                     controller=True,
+                    block_owner_deletion=True,
                 )
             ]
         ),
@@ -87,9 +88,7 @@ def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
     if not port:
         raise kopf.TemporaryError("No ports found on service", delay=10)
 
-    ingress_obj = create_ingress_object(namespace, name, path, port)
-    ingress_obj.metadata.owner_references[0].uid = uid
-
+    ingress_obj = create_ingress_object(namespace, name, uid, path, port)
     ingress_name = ingress_obj.metadata.name
 
     try:
@@ -101,15 +100,3 @@ def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
             kopf.info(meta, reason="IngressPatched", message=f"Updated ingress {ingress_name}")
         else:
             raise kopf.TemporaryError(f"Failed to create/patch ingress: {e}", delay=10)
-
-
-@kopf.on.delete('v1', 'services')
-def cleanup_ingress(name, namespace, **_):
-    print(f"Cleaning up ingress for service {name} in namespace {namespace}!!!!!!!!!!!!!!!!!!")
-    api = k8s_client.NetworkingV1Api()
-    ingress_name_prefix = f"auto-ingress-{name}"
-    ingresses = api.list_namespaced_ingress(namespace).items
-    for ing in ingresses:
-        if ing.metadata.name.startswith(ingress_name_prefix):
-            api.delete_namespaced_ingress(ing.metadata.name, namespace)
-            kopf.info(ing.metadata, reason="IngressDeleted", message=f"Deleted ingress {ing.metadata.name}")
