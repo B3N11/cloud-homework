@@ -17,7 +17,7 @@ def find_http_port(service):
     print("---------------------")
     ports = service.spec['ports']
     for port in ports:
-        if port.name == "http":
+        if port['name'] == "http":
             return port
     return ports[0] if ports else None
 
