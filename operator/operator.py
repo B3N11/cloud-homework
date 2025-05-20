@@ -34,7 +34,6 @@ def create_ingress_object(namespace, service_name, path, port):
                     name=service_name,
                     uid="",
                     controller=True,
-                    block_owner_deletion=True,
                 )
             ]
         ),
@@ -71,7 +70,6 @@ def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
 
     ingress_name_prefix = f"auto-ingress-{name}"
 
-    # Clean up existing auto-ingress if annotation was removed
     if AUTO_INGRESS_ANNOTATION not in (annotations or {}):
         try:
             ingresses = api.list_namespaced_ingress(namespace).items
@@ -99,7 +97,6 @@ def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
         kopf.info(meta, reason="IngressCreated", message=f"Created ingress {ingress_name}")
     except ApiException as e:
         if e.status == 409:
-            # Already exists, try patching
             api.patch_namespaced_ingress(ingress_name, namespace, ingress_obj)
             kopf.info(meta, reason="IngressPatched", message=f"Updated ingress {ingress_name}")
         else:
