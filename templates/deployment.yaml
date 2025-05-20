@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-operator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-operator
+  template:
+    metadata:
+      labels:
+        app: ingress-operator
+    spec:
+      serviceAccountName: ingress-operator
+      containers:
+        - name: operator
+          image: brkkr/auto-ingress:latest
