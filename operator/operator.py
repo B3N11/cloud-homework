@@ -108,6 +108,7 @@ def manage_ingress(spec, meta, status, name, namespace, uid, annotations, **_):
 
 @kopf.on.delete('v1', 'services')
 def cleanup_ingress(name, namespace, **_):
+    print(f"Cleaning up ingress for service {name} in namespace {namespace}!!!!!!!!!!!!!!!!!!")
     api = k8s_client.NetworkingV1Api()
     ingress_name_prefix = f"auto-ingress-{name}"
     ingresses = api.list_namespaced_ingress(namespace).items
