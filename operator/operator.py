@@ -23,7 +23,7 @@ def find_http_port(service):
 
 
 def create_ingress_object(namespace, service_name, path, port):
-    ingress_name = build_ingress_name(service_name, port.name or str(port.port))
+    ingress_name = build_ingress_name(service_name, port['name'] or str(port['port']))
 
     return k8s_client.V1Ingress(
         metadata=k8s_client.V1ObjectMeta(
@@ -53,7 +53,7 @@ def create_ingress_object(namespace, service_name, path, port):
                                     service=k8s_client.V1IngressServiceBackend(
                                         name=service_name,
                                         port=k8s_client.V1ServiceBackendPort(
-                                            number=port.target_port or port.port
+                                            number=port['target_port'] or port['port']
                                         ),
                                     )
                                 ),
